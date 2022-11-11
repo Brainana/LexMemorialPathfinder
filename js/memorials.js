@@ -24,7 +24,8 @@ fetch("https://services.arcgis.com/bP0owepHkr9WxF4V/ArcGIS/rest/services/Monumen
     memorials.forEach(function(memorial) {
         memorial = memorial.attributes;
         let type = memorial.TYPE_;
-        if (memorial.DedicatedT === "Person" && (memorial.Monu_descr === "Cary Hall" || memorial.Monu_descr === "1605 Massachusetts Ave")) {
+        if ((memorial.DedicatedT === "Person" && (memorial.Monu_descr === "Cary Hall" || memorial.Monu_descr === "1605 Massachusetts Ave")) 
+        || !memorial.x || !memorial.y) {
             return;
         }
         if (type !== undefined) {
