@@ -1,0 +1,16 @@
+#memorial-types {
+    overflow: auto;
+    min-height: 400px;
+    height: calc(100% - 230px);
+    max-width: 345px;
+}
+
+#exceed-allowed-memorials {
+    display: none;
+}
+
+.memorial-photo {
+    max-width: 500px;
+    max-height: 500px;
+    width: 100%;
+}
