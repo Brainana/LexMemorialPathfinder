@@ -3,7 +3,7 @@ document.querySelector("#startingPoint").addEventListener('change', onStartingPo
 function setPlaceHolderText() {
     var startingPoint = document.querySelector("#startingPoint");
     if (window.innerWidth >= 770) {
-        startingPoint.placeholder = "Enter a gilocation, or click on the map";
+        startingPoint.placeholder = "Enter a location, or click on the map";
     }
 }
 

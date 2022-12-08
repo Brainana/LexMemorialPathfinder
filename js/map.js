@@ -6,8 +6,7 @@ function initMap() {
     // const lexingtonVisitorCenter = { lat: 42.449115, lng: -71.228909 };
     lexingtonVisitorCenter = new google.maps.LatLng(42.449115, -71.228909);
 
-    // The location of Lexington Visitor Center
-    // The map, centered at Uluru
+    // The map, centered at the Lexington Visitor Center
     window.map = new google.maps.Map(document.getElementById("map"), {
       zoom: 15,
       minZoom: 5,
