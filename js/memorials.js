@@ -110,21 +110,27 @@ async function handleMemorialClick(event) {
         }
         if (description) {
             // contentString += '<div class="fs-5 fw-semibold mt-2 mb-2">Description:</div><div class="fs-6">' + plaqueText + "</div>"; 
-            contentString += '<div class="fs-6">' + description + "</div>"; 
+            contentString += '<span class="fs-6, read-text">' + description + "</span>" + "<button class='speaker-button' onclick='speakerFunction()'></button>";
         }
         if (plaqueText) {
             // contentString += '<div class="fs-5 fw-semibold mt-2 mb-2">Plaque Text:</div><div class="fs-6">' + plaqueText + "</div>"; 
-            contentString += '<div class="fs-6">' + plaqueText + "</div>"; 
+            contentString += '<div class="fs-6, read-text">' + plaqueText + "</div>"; 
         }
         if (history) {
             // contentString += '<div class="fs-5 fw-semibold mt-2 mb-2">History:</div><div class="fs-6">' + history + "</div>"; 
-            contentString += '<div class="fs-6">' + history + "</div>"; 
+            contentString += '<div class="fs-6, read-text">' + history + "</div>"; 
         }
+
+        // var nameWithSpeaker = "";
+        // if(memorial.Name_of_Memorial){
+        //     nameWithSpeaker += memorial.Name_of_Memorial + "<input type='button' onclick='alert(\"infoWindow\")'>"
+        // }
 
         var infoWindow;
         if (contentString) {
             infoWindow = new google.maps.InfoWindow({
                 content: contentString,
+                // ariaLabel: nameWithSpeaker,
                 ariaLabel: memorial.Name_of_Memorial,
                 maxWidth: 600
             });
@@ -153,6 +159,11 @@ async function handleMemorialClick(event) {
             memorialSelected[memorialCheckBox.id].infowindow = infoWindow;
         }
 
+        infoWindow.addListener('closeclick', ()=>{
+            speechSynthesis.cancel();
+            close();
+        });
+
     } else {
         if (memorialSelected[memorialCheckBox.id].infowindow) {
             delete memorialSelected[memorialCheckBox.id].infowindow;
@@ -180,6 +191,39 @@ async function getAttachmentUrl(memorial) {
         return baseAttachmentUrl + "/" + attachmentId + "?width=200";
     } 
     return null;
+}
+
+function speakerFunction(){
+    // alert("speaker button works");
+
+    if ('speechSynthesis' in window) {
+        var synthesis = window.speechSynthesis;
+      
+        // Get the first `en` language voice in the list
+        var voice = synthesis.getVoices().filter(function (voice) {
+          return voice.lang === 'en';
+        })[0];
+
+
+        var readText = document.getElementsByClassName('read-text')
+        var description = "";
+        for(let i=0; i<readText.length; i++){
+            description += readText[i].innerText;
+        }
+      
+        // Create an utterance object
+        var utterance = new SpeechSynthesisUtterance(description);
+        console.log(description);
+      
+        // Set utterance properties
+        utterance.rate = 0.85;
+      
+        // Speak the utterance
+        synthesis.speak(utterance);
+      } else {
+        console.log('Text-to-speech not supported.');
+      }
+
 }
 
 // function getAttachmentUrl(memorial) {

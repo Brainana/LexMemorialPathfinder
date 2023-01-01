@@ -14,3 +14,13 @@
     max-height: 500px;
     width: 100%;
 }
+
+.speaker-button {
+    background:url(../images/speaker-icon.png) no-repeat;
+    width: 20px;
+    height: 20px;
+    background-size: 100%;
+    border: none;
+    padding: 3px;
+    margin: 5px;
+}
