@@ -3,50 +3,56 @@ var memorialTypeCode2Name = {};
 var memorials;
 var lastOpenInfoWindow;
 
-fetch("https://services.arcgis.com/bP0owepHkr9WxF4V/ArcGIS/rest/services/Monument_plaques_Verified/FeatureServer/0/query?f=json&cacheHint=true&resultOffset=0&resultRecordCount=500&where=1%3D1&orderByFields=&outFields=*&returnGeometry=false&spatialRel=esriSpatialRelIntersects")
-// fetch("./data/memorials.json")
-  .then(response => response.json())
-  .then(function(json) {
-    console.log(json);
+async function fetchData() {
+    try {
+        const response = await fetch("https://services.arcgis.com/bP0owepHkr9WxF4V/ArcGIS/rest/services/Monument_plaques_Verified/FeatureServer/0/query?f=json&cacheHint=true&resultOffset=0&resultRecordCount=500&where=1%3D1&orderByFields=&outFields=*&returnGeometry=false&spatialRel=esriSpatialRelIntersects");
+        const json = await response.json();
+        console.log(json);
 
-    let fields = json.fields;
-    fields.forEach(function(field) {
-        if (field.name === "TYPE_") {
-            field.domain.codedValues.forEach(function(type){
-                memorialTypeCode2Name[type.code] = type.name;
-            }) 
-        }
-    })
-
-    memorials = json.features;
-    let memorialsByType = {};
-    
-    memorials.forEach(function(memorial) {
-        memorial = memorial.attributes;
-        let type = memorial.TYPE_;
-        if ((memorial.DedicatedT === "Person" && (memorial.Monu_descr === "Cary Hall" || memorial.Monu_descr === "1605 Massachusetts Ave")) 
-        || !memorial.x || !memorial.y) {
-            return;
-        }
-        if (type !== undefined) {
-            if (memorialsByType[type] === undefined) {
-                memorialsByType[type] = [memorial];
-            } else {
-                memorialsByType[type].push(memorial);
+        let fields = json.fields;
+        fields.forEach(function (field) {
+            if (field.name === "TYPE_") {
+                field.domain.codedValues.forEach(function (type) {
+                    memorialTypeCode2Name[type.code] = type.name;
+                })
             }
-        }
-    })
-    console.log(memorialsByType);
+        })
 
-    createMemorialsByType(memorialsByType);
+        memorials = json.features;
+        let memorialsByType = {};
 
-});
+        memorials.forEach(function (memorial) {
+            memorial = memorial.attributes;
+            let type = memorial.TYPE_;
+            if ((memorial.DedicatedT === "Person" && (memorial.Monu_descr === "Cary Hall" || memorial.Monu_descr === "1605 Massachusetts Ave"))
+                || !memorial.x || !memorial.y) {
+                return;
+            }
+            if (type !== undefined) {
+                if (memorialsByType[type] === undefined) {
+                    memorialsByType[type] = [memorial];
+                } else {
+                    memorialsByType[type].push(memorial);
+                }
+            }
+        })
+        console.log(memorialsByType);
+
+        createMemorialsByType(memorialsByType);
+
+
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+fetchData();
 
 var memorialSelected = {};
 var markers = {};
 
 function closeExceedAllowedMemorialsAlert() {
-    let alert =  document.querySelector("#exceed-allowed-memorials");
+    let alert = document.querySelector("#exceed-allowed-memorials");
     alert.style.display = "none";
 }
 
@@ -56,14 +62,14 @@ async function handleMemorialClick(event) {
     // Check if the user picked more than 10 memorials
     if (memorialSelected[memorialCheckBox.id] === undefined && Object.keys(memorialSelected).length === 10) {
         event.preventDefault();
-        let alert =  document.querySelector("#exceed-allowed-memorials");
+        let alert = document.querySelector("#exceed-allowed-memorials");
         var checkBoxRectangle = memorialCheckBox.getBoundingClientRect();
         alert.style.top = Math.ceil(checkBoxRectangle.top - 75).toString() + "px";
-        alert.style.left = Math.ceil( checkBoxRectangle.left - 20).toString() + "px";
+        alert.style.left = Math.ceil(checkBoxRectangle.left - 20).toString() + "px";
         alert.style.display = "block";
         return false;
     }
-    
+
     console.log(memorialCheckBox);
 
     // let noLocationAlert =  document.querySelector("#no-location-alert");
@@ -78,18 +84,18 @@ async function handleMemorialClick(event) {
     clearRenderedRoutes();
 
     if (memorialSelected[memorialCheckBox.id] === undefined) {
-    // if (markers[memorialCheckBox.id] === undefined) {
+        // if (markers[memorialCheckBox.id] === undefined) {
         var latLng = new google.maps.LatLng(parseFloat(memorialCheckBox.getAttribute("lat")), parseFloat(memorialCheckBox.getAttribute("lng")));
         // const memorialGIS = { lat: parseFloat(memorialCheckBox.getAttribute("lat")), lng: parseFloat(memorialCheckBox.getAttribute("lng")) };
 
         var type = memorialCheckBox.getAttribute("memorialtype");
         var pinIcon = new google.maps.MarkerImage(
-            "./images/" +  type + ".png",
+            "./images/" + type + ".png",
             null, /* size is determined at runtime */
             null, /* origin is 0,0 */
             null, /* anchor is bottom center of the scaled image */
             new google.maps.Size(36, 36)
-        );  
+        );
         // The marker, positioned at memorial
         const marker = new google.maps.Marker({
             position: latLng,
@@ -114,11 +120,11 @@ async function handleMemorialClick(event) {
         }
         if (plaqueText) {
             // contentString += '<div class="fs-5 fw-semibold mt-2 mb-2">Plaque Text:</div><div class="fs-6">' + plaqueText + "</div>"; 
-            contentString += '<div class="fs-6, read-text">' + plaqueText + "</div>"; 
+            contentString += '<div class="fs-6, read-text">' + plaqueText + "</div>";
         }
         if (history) {
             // contentString += '<div class="fs-5 fw-semibold mt-2 mb-2">History:</div><div class="fs-6">' + history + "</div>"; 
-            contentString += '<div class="fs-6, read-text">' + history + "</div>"; 
+            contentString += '<div class="fs-6, read-text">' + history + "</div>";
         }
 
         // var nameWithSpeaker = "";
@@ -142,8 +148,8 @@ async function handleMemorialClick(event) {
 
                 lastOpenInfoWindow = infoWindow;
                 infoWindow.open({
-                anchor: marker,
-                map,
+                    anchor: marker,
+                    map,
                 });
             });
         }
@@ -154,12 +160,12 @@ async function handleMemorialClick(event) {
             marker: marker,
             type: type
         }
-        
+
         if (infoWindow) {
             memorialSelected[memorialCheckBox.id].infowindow = infoWindow;
         }
 
-        infoWindow.addListener('closeclick', ()=>{
+        infoWindow.addListener('closeclick', () => {
             speechSynthesis.cancel();
             close();
         });
@@ -189,40 +195,40 @@ async function getAttachmentUrl(memorial) {
     }
     if (attachmentId) {
         return baseAttachmentUrl + "/" + attachmentId + "?width=200";
-    } 
+    }
     return null;
 }
 
-function speakerFunction(){
+function speakerFunction() {
     // alert("speaker button works");
 
     if ('speechSynthesis' in window) {
         var synthesis = window.speechSynthesis;
-      
+
         // Get the first `en` language voice in the list
         var voice = synthesis.getVoices().filter(function (voice) {
-          return voice.lang === 'en';
+            return voice.lang === 'en';
         })[0];
 
 
         var readText = document.getElementsByClassName('read-text')
         var description = "";
-        for(let i=0; i<readText.length; i++){
+        for (let i = 0; i < readText.length; i++) {
             description += readText[i].innerText;
         }
-      
+
         // Create an utterance object
         var utterance = new SpeechSynthesisUtterance(description);
         console.log(description);
-      
+
         // Set utterance properties
         utterance.rate = 0.85;
-      
+
         // Speak the utterance
         synthesis.speak(utterance);
-      } else {
+    } else {
         console.log('Text-to-speech not supported.');
-      }
+    }
 
 }
 
@@ -237,14 +243,14 @@ function speakerFunction(){
 // }
 
 function createMemorialsByType(memorialsByType) {
-    let accordion =  document.querySelector("#memorial-types");
-    for(let type in memorialsByType) {
+    let accordion = document.querySelector("#memorial-types");
+    for (let type in memorialsByType) {
         let memorials = memorialsByType[type];
-        memorials.sort(function(a, b){return a.Name_of_Memorial.localeCompare(b.Name_of_Memorial)});
-        let checkboxes ="";
-        memorials.forEach(function(memorial) {
-            var memorialName = memorial.Name_of_Memorial.replace(/[\u00A0-\u9999<>\&]/g, function(i) {
-                return '&#'+i.charCodeAt(0)+';';
+        memorials.sort(function (a, b) { return a.Name_of_Memorial.localeCompare(b.Name_of_Memorial) });
+        let checkboxes = "";
+        memorials.forEach(function (memorial) {
+            var memorialName = memorial.Name_of_Memorial.replace(/[\u00A0-\u9999<>\&]/g, function (i) {
+                return '&#' + i.charCodeAt(0) + ';';
             });
             checkboxes += `
                 <div class="form-check">
