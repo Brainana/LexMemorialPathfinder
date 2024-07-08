@@ -5,6 +5,7 @@
 } */
 
 html,body{
+    padding-top: 8px;
     height:100%;
 }
 
